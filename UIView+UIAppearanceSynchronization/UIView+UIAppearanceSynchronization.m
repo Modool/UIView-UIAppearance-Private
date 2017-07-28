@@ -9,29 +9,6 @@
 #import <JRSwizzle/JRSwizzle.h>
 #import "UIView+UIAppearanceSynchronization.h"
 
-@interface UIAppearanceInstanceProxy : NSObject
-@property (nonatomic, assign, readonly) id target;
-@end
-
-@implementation UIAppearanceInstanceProxy
-
-- (instancetype)initWithTarget:(id)target{
-    if (self = [super init]) {
-        _target = target;
-    }
-    return self;
-}
-
-- (BOOL)isEqual:(id)object{
-    return [[self target] isEqual:object];
-}
-
-- (NSUInteger)hash{
-    return [[self target] hash];
-}
-
-@end
-
 // _UIAppearanceCustomizableClassInfo
 @protocol _UIAppearanceCustomizableClassInfoProtocol <NSObject>
 
@@ -49,10 +26,9 @@
 // _UIAppearance
 @protocol UIAppearanceProtocol <NSObject>
 
-@property (nonatomic, strong, readonly) NSMutableArray<UIAppearanceInstanceProxy *> *mutableInstanceProxys;
+@property (nonatomic, strong, readonly) NSHashTable *mutableInstances;
 
 - (void)registerAppreanceInstance:(__weak id)instance;
-- (void)unregisterAppreanceInstance:(__weak id)instance;
 
 @end
 
@@ -65,26 +41,8 @@
 
 @end
 
-// UIAppearanceViewInstanceSetter
-@interface UIAppearanceViewInstanceSetter : NSObject
-
-@property (nonatomic, assign) id instance;
-@property (nonatomic, weak) id<_UIAppearanceProtocol> apearance;
-
-@end
-
-@implementation UIAppearanceViewInstanceSetter
-
-- (void)dealloc{
-    [[self apearance] unregisterAppreanceInstance:[self instance]];
-}
-
-@end
-
 // UIView-UIAppearance
 @protocol UIAppearanceViewInstanceProtocol <NSObject>
-
-@property (nonatomic, strong, readonly) UIAppearanceViewInstanceSetter *appearanceViewInstanceSetter;
 
 @end
 
@@ -107,15 +65,6 @@
         [appreance registerAppreanceInstance:object];
     }
     return object;
-}
-
-- (UIAppearanceViewInstanceSetter *)appearanceViewInstanceSetter{
-    UIAppearanceViewInstanceSetter *setter = objc_getAssociatedObject(self, @selector(appearanceViewInstanceSetter));
-    if (!setter) {
-        setter = [UIAppearanceViewInstanceSetter new];
-        objc_setAssociatedObject(self, @selector(appearanceViewInstanceSetter), setter, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    }
-    return setter;
 }
 
 - (BOOL)allowSynchronizeAppreance{
@@ -142,12 +91,12 @@
     [self swizzle_forwardInvocation:anInvocation];
     
     if ([[self _appearanceInvocations] containsObject:anInvocation]) {
-        NSArray *proxys = [[self mutableInstanceProxys] copy];
-        [proxys enumerateObjectsUsingBlock:^(UIAppearanceInstanceProxy *proxy, NSUInteger idx, BOOL *stop) {
-            if ([[proxy target] respondsToSelector:[anInvocation selector]]) {
-                [anInvocation invokeWithTarget:[proxy target]];
+        NSPointerArray *instances = [[self mutableInstances] copy];
+        for (id instance in instances) {
+            if ([instance respondsToSelector:[anInvocation selector]]) {
+                [anInvocation invokeWithTarget:instance];
             }
-        }];
+        }
     }
 }
 
@@ -157,22 +106,13 @@
 
 #pragma mark - accessor
 
-- (NSMutableArray<UIAppearanceInstanceProxy *> *)mutableInstanceProxys{
-    NSMutableArray *instances = objc_getAssociatedObject(self, @selector(mutableInstanceProxys));
+- (NSHashTable *)mutableInstances{
+    NSHashTable *instances = objc_getAssociatedObject(self, @selector(mutableInstances));
     if (!instances) {
-        instances = [NSMutableArray new];
-        objc_setAssociatedObject(self, @selector(mutableInstanceProxys), instances, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        instances = [NSHashTable weakObjectsHashTable];
+        objc_setAssociatedObject(self, @selector(mutableInstances), instances, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     return instances;
-}
-
-- (id)proxyInstancesWithInstance:(id)instance{
-    for (UIAppearanceInstanceProxy *proxyInstance in [[self mutableInstanceProxys] copy]) {
-        if ([proxyInstance target] == instance) {
-            return proxyInstance;
-        }
-    }
-    return nil;
 }
 
 - (void)registerAppreanceInstance:(id<UIAppearanceViewInstanceProtocol>)instance;{
@@ -180,24 +120,8 @@
     NSParameterAssert([self class] == NSClassFromString(@"_UIAppearance"));
     NSParameterAssert([[instance class] conformsToProtocol:@protocol(UIAppearance)]);
     NSParameterAssert([instance class] == [[self _customizableClassInfo] _customizableViewClass]);
-    instance.appearanceViewInstanceSetter.apearance = self;
-    instance.appearanceViewInstanceSetter.instance = instance;
     
-    id proxy = [[UIAppearanceInstanceProxy alloc] initWithTarget:instance];
-    
-    [[self mutableInstanceProxys] addObject:proxy];
-}
-
-- (void)unregisterAppreanceInstance:(id<UIAppearanceViewInstanceProtocol>)instance;{
-    NSParameterAssert(instance);
-    NSParameterAssert([self class] == NSClassFromString(@"_UIAppearance"));
-    NSParameterAssert([[instance class] conformsToProtocol:@protocol(UIAppearance)]);
-    NSParameterAssert([instance class] == [[self _customizableClassInfo] _customizableViewClass]);
-    
-    id proxy = [self proxyInstancesWithInstance:instance];
-    if (proxy) {
-        [[self mutableInstanceProxys] removeObject:proxy];
-    }
+    [[self mutableInstances] addObject:instance];
 }
 
 @end
