@@ -33,7 +33,7 @@ end
 * Installation with Carthage
 
 ```
-github "Modool/UIView-UIAppearance" ~> 1.0
+github "Modool/UIView-UIAppearance-Private" ~> 1.0
 ```
 
 * Manual Import
