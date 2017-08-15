@@ -7,6 +7,7 @@
 //
 
 #import "ViewController.h"
+#import "TestViewController.h"
 
 @interface UITestLabel : UILabel
 
@@ -42,6 +43,8 @@
 
 @property (nonatomic, strong) UIButton *clearButton;
 
+@property (nonatomic, strong) UIButton *presentButton;
+
 @end
 
 @implementation ViewController
@@ -58,7 +61,7 @@
     self.colorButton = [[UIButton alloc] initWithFrame:CGRectMake(20, 500, 50, 40)];
     [[self colorButton] setTitle:@"color" forState:UIControlStateNormal];
     [[self colorButton] setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
-    [[self colorButton] addTarget:self action:@selector(didClickTest:) forControlEvents:UIControlEventTouchUpInside];
+    [[self colorButton] addTarget:self action:@selector(didClickTestColor:) forControlEvents:UIControlEventTouchUpInside];
     
     self.addButton = [[UIButton alloc] initWithFrame:CGRectMake(80, 500, 50, 40)];
     [[self addButton] setTitle:@"add" forState:UIControlStateNormal];
@@ -70,9 +73,15 @@
     [[self clearButton] setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
     [[self clearButton] addTarget:self action:@selector(didClickClear:) forControlEvents:UIControlEventTouchUpInside];
     
+    self.presentButton = [[UIButton alloc] initWithFrame:CGRectMake(200, 500, 80, 40)];
+    [[self presentButton] setTitle:@"present" forState:UIControlStateNormal];
+    [[self presentButton] setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
+    [[self presentButton] addTarget:self action:@selector(didClickPresent:) forControlEvents:UIControlEventTouchUpInside];
+    
     [[self view] addSubview:[self colorButton]];
     [[self view] addSubview:[self addButton]];
     [[self view] addSubview:[self clearButton]];
+    [[self view] addSubview:[self presentButton]];
 }
 
 #pragma mark - actions
@@ -80,7 +89,7 @@
 static BOOL red = YES;
 static NSUInteger count = 1;
 
-- (IBAction)didClickTest:(id)sender{
+- (IBAction)didClickTestColor:(id)sender{
     red = !red;
     
     UITestLabel.appearance.color = red ? [UIColor redColor] : [UIColor blueColor];
@@ -103,6 +112,11 @@ static NSUInteger count = 1;
             [label removeFromSuperview];
         }
     }
+}
+
+- (IBAction)didClickPresent:(id)sender{
+
+    [self presentViewController:[TestViewController new] animated:YES completion:nil];
 }
 
 @end
