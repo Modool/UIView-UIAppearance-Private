@@ -28,6 +28,8 @@ FOUNDATION_EXPORT const unsigned char UIView_UIAppearance_PrivateVersionString[]
 
 // In this header, you should import all the public headers of your framework using statements like #import <UIView_UIAppearance_Private/PublicHeader.h>
 
+extern void UIView_UIAppearanceMethodSwizzle(Class class, SEL origSel, SEL altSel);
+
 @interface UIView (UIAppearance)
 
 @property (nonatomic, assign, readonly) BOOL allowSynchronizeAppreance;

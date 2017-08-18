@@ -6,7 +6,24 @@
 //  Copyright © 2017年 Marike Jave. All rights reserved.
 //
 
+#import <objc/runtime.h>
 #import "TestViewController.h"
+#import "UIView+UIAppearance+Private.h"
+
+@implementation NSObject(_UIAppearanceRecorder)
+
++ (void)load{
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        UIView_UIAppearanceMethodSwizzle(object_getClass((id)NSClassFromString(@"_UIAppearanceRecorder")), @selector(allocWithZone:), @selector(UIAppearanceRecorder_allocWithZone:));
+    });
+}
+
++ (id)UIAppearanceRecorder_allocWithZone:(NSZone *)zone{
+    return [self UIAppearanceRecorder_allocWithZone:zone];
+}
+
+@end
 
 @interface TestLabel : UILabel
 
@@ -165,6 +182,19 @@
     } else {
         [[self view] addSubview:[self testLabel]];
     }
+    
+    id<UIAppearance> appearance = [TestLabel appearance];
+    
+    NSLog(@"%@", [appearance description]);
+    
+    appearance = [TestLabel appearanceWhenContainedIn:[self class], nil];
+    
+    NSLog(@"%@", [appearance description]);
+    
+    appearance = [TestLabel appearanceForTraitCollection:[self traitCollection]];
+    
+    NSLog(@"%@", [appearance description]);
+    
 }
 
 @end

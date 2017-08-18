@@ -21,7 +21,7 @@
 #import <objc/runtime.h>
 #import "UIView+UIAppearance+Private.h"
 
-static void UIView_UIAppearanceMethodSwizzle(Class class, SEL origSel, SEL altSel){
+void UIView_UIAppearanceMethodSwizzle(Class class, SEL origSel, SEL altSel){
     Method origMethod = class_getInstanceMethod(class, origSel);
     Method altMethod = class_getInstanceMethod(class, altSel);
     
