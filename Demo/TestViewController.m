@@ -47,6 +47,77 @@
 
 @end
 
+@implementation UIView (Hook)
+
++ (void)load{
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+//        UIView_UIAppearanceMethodSwizzle(self, @selector(_addSubview:positioned:relativeTo:), @selector(swizzle_addSubview:positioned:relativeTo:));
+//        UIView_UIAppearanceMethodSwizzle(self, @selector(_willMoveToWindow:withAncestorView:), @selector(swizzle_willMoveToWindow:withAncestorView:));
+//        UIView_UIAppearanceMethodSwizzle(self, @selector(_willMoveToWindow:), @selector(swizzle_willMoveToWindow:));
+//        UIView_UIAppearanceMethodSwizzle(self, @selector(_associatedViewControllerForwardsAppearanceCallbacks:performHierarchyCheck:isRoot:), @selector(swizzle_associatedViewControllerForwardsAppearanceCallbacks:performHierarchyCheck:isRoot:));
+//        UIView_UIAppearanceMethodSwizzle(self, @selector(_willChangeToIdiomOnScreen:traverseHierarchy:), @selector(swizzle_willChangeToIdiomOnScreen:traverseHierarchy:));
+//        UIView_UIAppearanceMethodSwizzle(self, @selector(_willChangeToIdiom:onScreen:traverseHierarchy:), @selector(swizzle_willChangeToIdiom:onScreen:traverseHierarchy:));
+//        UIView_UIAppearanceMethodSwizzle(self, @selector(_descendent:willMoveFromSuperview:toSuperview:), @selector(swizzle_descendent:willMoveFromSuperview:toSuperview:));
+//        UIView_UIAppearanceMethodSwizzle(self, @selector(_postMovedFromSuperview:), @selector(swizzle_postMovedFromSuperview:));
+//        UIView_UIAppearanceMethodSwizzle(self, @selector(_didMoveFromWindow:toWindow:), @selector(swizzle_didMoveFromWindow:toWindow:));
+//        UIView_UIAppearanceMethodSwizzle(self, @selector(_applyAppearanceInvocations), @selector(swizzle_applyAppearanceInvocations));
+//        UIView_UIAppearanceMethodSwizzle(self, @selector(_descendent:didMoveFromSuperview:toSuperview:), @selector(swizzle_descendent:didMoveFromSuperview:toSuperview:));
+//        UIView_UIAppearanceMethodSwizzle(self, @selector(_invalidateAppearanceForSubviewsOfClass:), @selector(swizzle_invalidateAppearanceForSubviewsOfClass:));
+    });
+}
+
+- (void)swizzle_addSubview:(UIView *)view positioned:(int)arg2 relativeTo:(id)arg3;{
+    [self swizzle_addSubview:view positioned:arg2 relativeTo:arg3];
+}
+
+- (void)swizzle_willMoveToWindow:(UIWindow *)window withAncestorView:(UIView *)view;{
+    [self swizzle_willMoveToWindow:window withAncestorView:view];
+}
+
+- (void)swizzle_willMoveToWindow:(UIWindow *)window;{
+    [self swizzle_willMoveToWindow:window];
+}
+
+// register delegate
+- (_Bool)swizzle_associatedViewControllerForwardsAppearanceCallbacks:(id)arg1 performHierarchyCheck:(_Bool)arg2 isRoot:(_Bool)arg3;{
+    return [self swizzle_associatedViewControllerForwardsAppearanceCallbacks:arg1 performHierarchyCheck:arg2 isRoot:arg3];
+}
+
+- (void)swizzle_willChangeToIdiomOnScreen:(id)arg1 traverseHierarchy:(_Bool)arg2;{
+    [self swizzle_willChangeToIdiomOnScreen:arg1 traverseHierarchy:arg2];
+}
+
+- (void)swizzle_willChangeToIdiom:(long long)arg1 onScreen:(id)arg2 traverseHierarchy:(_Bool)arg3;{
+    [self swizzle_willChangeToIdiom:arg1 onScreen:arg2 traverseHierarchy:arg3];
+}
+
+- (void)swizzle_descendent:(id)arg1 willMoveFromSuperview:(id)arg2 toSuperview:(id)arg3;{
+    [self swizzle_descendent:arg1 willMoveFromSuperview:arg2 toSuperview:arg3];
+}
+
+- (void)swizzle_postMovedFromSuperview:(UIView *)view;{
+    [self swizzle_postMovedFromSuperview:view];
+}
+
+- (void)swizzle_didMoveFromWindow:(id)arg1 toWindow:(id)arg2;{
+    [self swizzle_didMoveFromWindow:arg1 toWindow:arg2];
+}
+
+- (void)swizzle_applyAppearanceInvocations;{
+    [self swizzle_applyAppearanceInvocations];
+}
+
+- (void)swizzle_descendent:(id)arg1 didMoveFromSuperview:(id)arg2 toSuperview:(id)arg3;{
+    [self swizzle_descendent:arg1 didMoveFromSuperview:arg2 toSuperview:arg3];
+}
+
+- (void)swizzle_invalidateAppearanceForSubviewsOfClass:(Class)class;{
+    [self swizzle_invalidateAppearanceForSubviewsOfClass:class];
+}
+
+@end
+
 @interface TestViewController ()
 
 @property (nonatomic, strong) UIButton *dissmissButton;
